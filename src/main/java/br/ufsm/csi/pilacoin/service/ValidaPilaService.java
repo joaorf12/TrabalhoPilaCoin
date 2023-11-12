@@ -1,5 +1,6 @@
 package br.ufsm.csi.pilacoin.service;
 
+import br.ufsm.csi.pilacoin.model.Chaves;
 import br.ufsm.csi.pilacoin.model.PilaCoin;
 import br.ufsm.csi.pilacoin.model.PilaCoinJson;
 import br.ufsm.csi.pilacoin.model.ValidacaoPilaJson;
@@ -57,7 +58,6 @@ public class ValidaPilaService {
                     ignorePilas.add(strPila);
 
                     //System.out.println(ignorePilas);
-                    System.out.println("oiu");
 
                     ObjectMapper ob = new ObjectMapper();
                     PilaCoinJson pilaCoin = ob.readValue(strPila, PilaCoinJson.class);
@@ -80,8 +80,10 @@ public class ValidaPilaService {
                             md.reset();
                             byte[] hash2 = md.digest(strPila.getBytes(StandardCharsets.UTF_8));
                             Cipher cipher = Cipher.getInstance("RSA");
-                            PrivateKey privateKey = readPrivateKeyFromFile("private_key.pem");
-                            PublicKey publicKey = readPublicKeyFromFile("public_key.pem");
+
+                            Chaves chaves = new Chaves();
+                            PrivateKey privateKey = chaves.getPrivateKey();
+                            PublicKey publicKey =  chaves.getPublicKey();
 
                             cipher.init(Cipher.ENCRYPT_MODE, privateKey);
                             String strHash = ob.writeValueAsString(hash2);

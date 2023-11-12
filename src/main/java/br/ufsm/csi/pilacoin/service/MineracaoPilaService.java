@@ -1,5 +1,6 @@
 package br.ufsm.csi.pilacoin.service;
 
+import br.ufsm.csi.pilacoin.model.Chaves;
 import br.ufsm.csi.pilacoin.model.PilaCoin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -20,12 +21,12 @@ import java.util.Date;
 import java.util.Random;
 
 @Service
-public class MineracaoService {
+public class MineracaoPilaService {
 
     private DificuldadeService dificuldadeService;
     private RequisicoesService requisicoesService;
 
-    public MineracaoService(DificuldadeService dificuldadeService, RequisicoesService requisicoesService) {
+    public MineracaoPilaService(DificuldadeService dificuldadeService, RequisicoesService requisicoesService) {
         this.dificuldadeService = dificuldadeService;
         this.requisicoesService = requisicoesService;
     }
@@ -35,8 +36,9 @@ public class MineracaoService {
     @SneakyThrows
     public void iniciaMineracao () {
         // Leia as chaves de volta dos arquivos
-        PrivateKey privateKey = readPrivateKeyFromFile("private_key.pem");
-        PublicKey publicKey = readPublicKeyFromFile("public_key.pem");
+        Chaves chaves = new Chaves();
+        PrivateKey privateKey = chaves.getPrivateKey();
+        PublicKey publicKey =  chaves.getPublicKey();
 
         new Thread(new Runnable() {
             @SneakyThrows
@@ -59,7 +61,7 @@ public class MineracaoService {
                     byte[] byteArray = new byte[256/8];
                     random.nextBytes(byteArray);
 
-                    pilaCoin.setNonce(byteArray);
+                    pilaCoin.setNonce(new BigInteger(byteArray).abs().toString());
 
                     ObjectMapper om = new ObjectMapper();
 
@@ -69,7 +71,7 @@ public class MineracaoService {
 
                 } while (hash.compareTo(dificuldadeService.getDif()) > 0);
                 //achou!!!!
-                System.out.println("Achei em "+total+" tentativas");
+                System.out.println("Pila minerado com "+total+" tentativas");
                 ObjectMapper om = new ObjectMapper();
 
                 requisicoesService.enviarRequisicao("pila-minerado", om.writeValueAsString(pilaCoin));
@@ -77,20 +79,20 @@ public class MineracaoService {
         }).start();
     }
 
-    public static PrivateKey readPrivateKeyFromFile(String fileName) throws Exception {
-        byte[] keyBytes = Files.readAllBytes(Paths.get(fileName));
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-        return keyFactory.generatePrivate(keySpec);
-    }
-
-    // Método para ler a chave pública de um arquivo
-    public static PublicKey readPublicKeyFromFile(String fileName) throws Exception {
-        byte[] keyBytes = Files.readAllBytes(Paths.get(fileName));
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-        return keyFactory.generatePublic(keySpec);
-    }
+//    public static PrivateKey readPrivateKeyFromFile(String fileName) throws Exception {
+//        byte[] keyBytes = Files.readAllBytes(Paths.get(fileName));
+//        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+//        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+//        return keyFactory.generatePrivate(keySpec);
+//    }
+//
+//    // Método para ler a chave pública de um arquivo
+//    public static PublicKey readPublicKeyFromFile(String fileName) throws Exception {
+//        byte[] keyBytes = Files.readAllBytes(Paths.get(fileName));
+//        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+//        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+//        return keyFactory.generatePublic(keySpec);
+//    }
 
 
 }

@@ -15,11 +15,12 @@ import java.util.Date;
 @NoArgsConstructor
 @JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PilaCoin {
-
-    private byte[] chaveCriador;
-    private String nomeCriador;
-    private Date dataCriacao;
-    private String nonce;
-
+public class Transacao {
+    private String chaveUsuarioOrigem;
+    private String chaveUsuarioDestino;
+    private String assinatura;
+    private String noncePila;
+    private Date dataTransacao;
+    private Long id;
+    private String status;
 }
